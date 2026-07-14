@@ -1,0 +1,7 @@
+{
+  "buildCommand": "cd Social_interaction && npm install && npm run build",
+  "outputDirectory": "Social_interaction/dist",
+  "installCommand": "cd Social_interaction && npm install",
+  "framework": null,
+  "devCommand": "cd Social_interaction && npm run dev"
+}

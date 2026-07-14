@@ -41,7 +41,7 @@ canvas#bg { position: fixed; inset: 0; width: 100%; height: 100%; z-index: -1; o
 .nav button.active { color: #07080f; background: var(--holo); box-shadow: 0 6px 22px -6px var(--violet); }
 .nav button:not(.active):hover { color: var(--text); background: var(--panel-2); }
 .spacer { flex: 1; }
-.badge { font-family: var(--mono); font-size: 11px; color: var(--ice); border: 1px solid var(--brd); padding: 6px 10px; border-radius: 999px; letter-spacing: .05em; }
+.badge { font-family: var(--mono); font-size: 16px; color: var(--ice); border: 1px solid var(--brd); padding: 8px 14px; border-radius: 999px; letter-spacing: .05em; font-weight: 600; }
 
 .stage { max-width: 470px; margin: 0 auto; padding: 26px 16px 90px; }
 .eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: .24em; text-transform: uppercase; color: var(--ice); }

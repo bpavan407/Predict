@@ -1,0 +1,48 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+          cache-dependency-path: 'Social_interaction/package-lock.json'
+      
+      - name: Install dependencies
+        working-directory: ./Social_interaction
+        run: npm ci
+      
+      - name: Run TypeScript compilation
+        working-directory: ./Social_interaction
+        run: npx tsc -b
+      
+      - name: Build project
+        working-directory: ./Social_interaction
+        run: npm run build
+      
+      - name: Upload build artifacts
+        if: matrix.node-version == '20.x'
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: Social_interaction/dist
+          retention-days: 7

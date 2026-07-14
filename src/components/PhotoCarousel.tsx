@@ -5,7 +5,7 @@ export default function PhotoCarousel({ photos, tag }: { photos: string[]; tag: 
   const [loaded, setLoaded] = useState(false);
   const [showAll, setShowAll] = useState(false);
   const [autoScrolling, setAutoScrolling] = useState(false);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const intervalRef = useRef<number | null>(null);
 
   useEffect(() => { setI(0); setShowAll(false); setAutoScrolling(false); }, [photos]);
   useEffect(() => { setLoaded(false); }, [i, photos]);

@@ -49,6 +49,7 @@ export default function PhotoCarousel({ photos, tag }: { photos: string[]; tag: 
   const openGallery = () => {
     setShowAll(true);
     setI(0);
+    setAutoScrolling(false);
     // Preload all images
     photos.forEach((photo, index) => {
       const img = new Image();
@@ -61,8 +62,7 @@ export default function PhotoCarousel({ photos, tag }: { photos: string[]; tag: 
         });
       };
     });
-    // Start auto-scroll after a brief delay
-    setTimeout(() => startAutoScroll(), 300);
+    // Don't start auto-scroll automatically - user must click the button
   };
 
   const closeGallery = () => {

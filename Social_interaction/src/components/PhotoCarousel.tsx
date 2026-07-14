@@ -1,17 +1,14 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function PhotoCarousel({ photos, tag }: { photos: string[]; tag: string }) {
   const [i, setI] = useState(0);
   const [loaded, setLoaded] = useState(false);
   const [showAll, setShowAll] = useState(false);
-  const [autoScrolling, setAutoScrolling] = useState(false);
   const [galleryLoaded, setGalleryLoaded] = useState<boolean[]>([]);
-  const intervalRef = useRef<number | null>(null);
 
   useEffect(() => { 
     setI(0); 
-    setShowAll(false); 
-    setAutoScrolling(false);
+    setShowAll(false);
     setGalleryLoaded(new Array(photos.length).fill(false));
   }, [photos]);
   
@@ -20,36 +17,11 @@ export default function PhotoCarousel({ photos, tag }: { photos: string[]; tag: 
   const n = photos.length;
   const go = (d: number) => {
     setI((p) => (p + d + n) % n);
-    stopAutoScroll();
-  };
-
-  const stopAutoScroll = () => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
-      setAutoScrolling(false);
-    }
-  };
-
-  const startAutoScroll = () => {
-    if (intervalRef.current) return;
-    
-    setAutoScrolling(true);
-    intervalRef.current = setInterval(() => {
-      setI((prev) => {
-        const next = (prev + 1) % n;
-        if (next === 0) {
-          stopAutoScroll();
-        }
-        return next;
-      });
-    }, 1500);
   };
 
   const openGallery = () => {
     setShowAll(true);
     setI(0);
-    setAutoScrolling(false);
     // Preload all images
     photos.forEach((photo, index) => {
       const img = new Image();
@@ -62,21 +34,11 @@ export default function PhotoCarousel({ photos, tag }: { photos: string[]; tag: 
         });
       };
     });
-    // Don't start auto-scroll automatically - user must click the button
   };
 
   const closeGallery = () => {
     setShowAll(false);
-    stopAutoScroll();
   };
-
-  useEffect(() => {
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-    };
-  }, []);
 
   return (
     <>
@@ -135,6 +97,8 @@ export default function PhotoCarousel({ photos, tag }: { photos: string[]; tag: 
             left: 0,
             right: 0,
             bottom: 0,
+            width: '100vw',
+            height: '100vh',
             backgroundColor: 'rgba(0, 0, 0, 0.95)',
             zIndex: 9999,
             display: 'flex',
@@ -177,36 +141,6 @@ export default function PhotoCarousel({ photos, tag }: { photos: string[]; tag: 
             ×
           </button>
 
-          {/* Auto-scroll control */}
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              if (autoScrolling) {
-                stopAutoScroll();
-              } else {
-                startAutoScroll();
-              }
-            }}
-            style={{
-              position: 'absolute',
-              top: '20px',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              padding: '8px 16px',
-              borderRadius: '20px',
-              backgroundColor: autoScrolling ? 'rgba(255, 100, 100, 0.8)' : 'rgba(100, 255, 100, 0.8)',
-              border: '2px solid white',
-              color: 'white',
-              fontSize: '14px',
-              fontWeight: 600,
-              cursor: 'pointer',
-              zIndex: 10001,
-              transition: 'all 0.2s',
-            }}
-          >
-            {autoScrolling ? '⏸ Stop Auto-scroll' : '▶ Start Auto-scroll'}
-          </button>
-
           {/* Image counter */}
           <div
             style={{
@@ -226,16 +160,17 @@ export default function PhotoCarousel({ photos, tag }: { photos: string[]; tag: 
             {i + 1} / {n}
           </div>
 
-          {/* Main image container */}
+          {/* Main image container - Full Width */}
           <div
             onClick={(e) => e.stopPropagation()}
             style={{
               position: 'relative',
-              maxWidth: '90vw',
-              maxHeight: '90vh',
+              width: '100%',
+              height: '100%',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
+              padding: '60px 80px',
             }}
           >
             {/* Left arrow */}
@@ -246,7 +181,7 @@ export default function PhotoCarousel({ photos, tag }: { photos: string[]; tag: 
               }}
               style={{
                 position: 'absolute',
-                left: '-60px',
+                left: '20px',
                 width: '50px',
                 height: '50px',
                 borderRadius: '50%',
@@ -273,13 +208,15 @@ export default function PhotoCarousel({ photos, tag }: { photos: string[]; tag: 
               ‹
             </button>
 
-            {/* Image */}
+            {/* Image - Full Width */}
             <img
               src={photos[i]}
               alt={`Home photo ${i + 1}`}
               style={{
                 maxWidth: '100%',
-                maxHeight: '90vh',
+                maxHeight: '100%',
+                width: 'auto',
+                height: 'auto',
                 objectFit: 'contain',
                 borderRadius: '8px',
                 opacity: galleryLoaded[i] ? 1 : 0,
@@ -310,7 +247,7 @@ export default function PhotoCarousel({ photos, tag }: { photos: string[]; tag: 
               }}
               style={{
                 position: 'absolute',
-                right: '-60px',
+                right: '20px',
                 width: '50px',
                 height: '50px',
                 borderRadius: '50%',

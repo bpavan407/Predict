@@ -81,6 +81,12 @@ export default function GamePlay({
     const all = [...guesses, g];
     setGuesses(all);
     track("guess_submit", { n: all.length, accuracy: pctBucket(pct) });
+    
+    // Scroll to top after wrong guess
+    if (!g.win) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+    
     requestAnimationFrame(() => {
       histRef.current?.scrollTo({ top: histRef.current.scrollHeight, behavior: "smooth" });
     });

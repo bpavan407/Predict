@@ -1,4 +1,9 @@
-import { LISTINGS, type Listing } from "../data/listings";
+import { LISTINGS as ALL_LISTINGS, type Listing } from "../data/listings";
+
+/** Only use listings that have at least one photo */
+export const LISTINGS = ALL_LISTINGS.filter(
+  (listing) => listing.photos && listing.photos.length > 0
+);
 
 const KEY = 987654;
 
@@ -35,12 +40,43 @@ export function todayKey(d = new Date()): string {
   return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
 }
 
-/** Two deterministic listings for today (same for everyone on the same date). */
+const EPOCH = new Date(2024, 0, 1).getTime();
+
+function dayIndexFromKey(dateKey: string): number {
+  const [y, m, d] = dateKey.split("-").map(Number);
+  const ms = new Date(y, m - 1, d).getTime();
+  return Math.floor((ms - EPOCH) / 86_400_000);
+}
+
+/** Deterministic shuffle of [0..n) using a seeded RNG (Fisher-Yates). */
+function shuffledIndices(n: number, seed: number): number[] {
+  const arr = Array.from({ length: n }, (_, i) => i);
+  const rng = mulberry(seed);
+  for (let i = n - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+/**
+ * Two deterministic listings for today (same for everyone on the same date).
+ * Rotates through every listing exactly once before any repeats: each "cycle"
+ * (Math.floor(LISTINGS.length / 2) days) uses a fresh shuffle of all listings,
+ * paired up two-per-day, so nothing repeats until the whole set has been shown.
+ */
 export function dailyListings(dateKey = todayKey()): Listing[] {
-  const seed = hashStr(dateKey);
-  const a = seed % LISTINGS.length;
-  let b = (seed >> 8) % LISTINGS.length;
-  if (b === a) b = (b + 1) % LISTINGS.length;
+  const n = LISTINGS.length;
+  const perDay = 2;
+  const cycleLength = Math.max(1, Math.floor(n / perDay));
+  const dayIndex = dayIndexFromKey(dateKey);
+  const cycle = Math.floor(dayIndex / cycleLength);
+  let pos = dayIndex % cycleLength;
+  if (pos < 0) pos += cycleLength;
+
+  const order = shuffledIndices(n, hashStr(`cycle:${cycle}`));
+  const a = order[pos * 2];
+  const b = order[pos * 2 + 1];
   return [LISTINGS[a], LISTINGS[b]];
 }
 
